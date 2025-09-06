@@ -39,3 +39,4 @@ class DataManager:
             response.raise_for_status()
             print(f"✅ Updated {city['city']} → {city['iataCode']}")
 
+
