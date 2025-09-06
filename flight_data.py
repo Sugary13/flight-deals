@@ -18,11 +18,11 @@ class FlightData:
 
     def flight_data(self, data):
         try:
-            self.price = data["price"]["total"]
-            self.origin_airport = data["itineraries"][0]["segments"][0]["departure"]["iataCode"]
-            self.destination_airport = data["itineraries"][0]["segments"][0]["arrival"]["iataCode"]
-            self.out_date = data["itineraries"][0]["segments"][0]["departure"]["at"]
-            self.return_date = data["itineraries"][1]["segments"][0]["arrival"]["at"]
+            self.price = data["data"][0]["price"]["total"]
+            self.origin_airport = data["data"][0]["itineraries"][0]["segments"][0]["departure"]["iataCode"]
+            self.destination_airport = data["data"][0]["itineraries"][0]["segments"][0]["arrival"]["iataCode"]
+            self.out_date = data["data"][0]["itineraries"][0]["segments"][0]["departure"]["at"]
+            self.return_date = data["data"][0]["itineraries"][1]["segments"][0]["arrival"]["at"]
 
             structured_data = {
                 "Price": self.price,
@@ -43,6 +43,3 @@ class FlightData:
                 "Out-Date": "N/A",
                 "Return-Date": "N/A",
             }
-
-
-
