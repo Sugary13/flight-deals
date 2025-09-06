@@ -9,10 +9,10 @@ class FlightSearch:
         dotenv.load_dotenv()
         self.amadeus_api_key = os.getenv("AMADEUS_API_KEY")
         self.amadeus_api_secret = os.getenv("AMADEUS_API_SECRET")
-        self.token = self._get_new_token()
-        self.tomorrow = datetime.date.today() + datetime.timedelta(days=1)
         self.endpoint = os.getenv("AMADEUS_ENDPOINT")
-        self.tomorrow = self.tomorrow.isoformat()
+        self.token = self._get_new_token()
+        self.tomorrow = (datetime.date.today() + datetime.timedelta(days=1)).isoformat()
+        self.six_month_from_today = (datetime.date.today() + datetime.timedelta(days=(6 * 30))).isoformat()
 
     def _get_new_token(self):
         header = {
@@ -24,8 +24,16 @@ class FlightSearch:
             "client_secret": self.amadeus_api_secret,
         }
         response = requests.post(f"{self.endpoint}/v1/security/oauth2/token", headers=header, data=body)
-        print(f"Your token expires in {response.json()['expires_in']} seconds")
-        return response.json()["access_token"]
+        response.raise_for_status()  # <-- Para detectar errores de inmediato
+
+        data = response.json()
+        token = data.get("access_token")
+
+        if not token:
+            raise ValueError(f"⚠️ Could not fetch token. Response: {data}")
+
+        print(f"✅ Token generated successfully. Expires in {data.get('expires_in', 'unknown')} seconds")
+        return token
 
     def get_destination_code(self, city):
         response = requests.get(
@@ -60,14 +68,18 @@ class FlightSearch:
                 "departureDate": self.tomorrow,
                 "adults": 1,
                 "currencyCode": "GBP",
-                "max": 1
+                "max": 1,
+                "returnDate": self.six_month_from_today
             }
         )
         response.raise_for_status()
 
         data = response.json()
         try:
-            return data["data"][0]
+            return data
         except (IndexError, KeyError):
             print(f"⚠️ No flight offers found. Full response: {data}")
             return None
+
+
+
